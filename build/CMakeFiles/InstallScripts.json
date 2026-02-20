@@ -1,0 +1,18 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/3rd_party/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/3rd_party/glew/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/3rd_party/glfw/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/3rd_party/glfw/src/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/3rd_party/glog/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/easy3d/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/easy3d/core/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/easy3d/fileio/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/easy3d/util/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/easy3d/viewer/cmake_install.cmake",
+		"/Users/geethav/Downloads/Masters in Geomatics/Quarter 3/GEO1016 - Photogrammetry and 3D computer Vision/Assignment-1/Geo1016Ass1/build/Calibration/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
