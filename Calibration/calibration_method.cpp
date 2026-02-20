@@ -127,7 +127,7 @@ bool Calibration::calibration(
                0, 0, 1);
 
     /// define and initialize a 3 by 4 matrix
-    Matrix34 P(1.1, 2.2, 3.3, 0,
+    Matrix34 P_old(1.1, 2.2, 3.3, 0,
                0, 2.2, 3.3, 1,
                0, 0, 1, 1);
 
@@ -201,8 +201,47 @@ bool Calibration::calibration(
                  "\tIMPORTANT: don't forget to write your recovered parameters to the above variables." << std::endl;
 
     // TODO: check if input is valid (e.g., number of correspondences >= 6, sizes of 2D/3D points must match)
+    unsigned int n_points_3d = points_3d.size();
+    unsigned int n_points_2d = points_2d.size();
+    if (n_points_3d < 6 || n_points_2d != n_points_3d) {
+        return false;
+    }
 
     // TODO: construct the P matrix (so P * m = 0).
+    Matrix P (2 * n_points_3d, 12);
+    for (unsigned int i = 0; i < n_points_3d; i++){
+        unsigned int i_row = 2*i;
+        Vector3D point_world = points_3d[i];
+        Vector2D point_picture = points_2d[i];
+        P.set_row(i_row, {
+            point_world[0],
+            point_world[1],
+            point_world[2],
+            1,
+            0,
+            0,
+            0,
+            0,
+            -point_picture[0]*point_world[0],
+            -point_picture[0]*point_world[1],
+            -point_picture[0]*point_world[2],
+            -point_picture[0]
+        });
+        P.set_row(i_row + 1, {
+            0,
+            0,
+            0,
+            0,
+            point_world[0],
+            point_world[1],
+            point_world[2],
+            1,
+            -point_picture[1]*point_world[0],
+            -point_picture[1]*point_world[1],
+            -point_picture[1]*point_world[2],
+            -point_picture[1]});
+    }
+    std::cout << P << std::endl;
 
     // TODO: solve for M (the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
     //   Optional: you can check if your M is correct by applying M on the 3D points. If correct, the projected point
@@ -219,20 +258,4 @@ bool Calibration::calibration(
                  "\t\tif your calibration is successful or not.\n\n" << std::flush;
     return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
