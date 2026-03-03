@@ -101,6 +101,8 @@ namespace easy3d {
         /// Constructs a matrix from a 3 by 4 matrix.
         Matrix(const Matrix34 &rhs);
 
+        Matrix(int i, int i1, int i2);
+
         /// Create an identity matrix (i.e., all elements on the diagonal have a value of 1).
         /// @note This function also allow to set the elements on the diagonal to have values other than 1.
         static Matrix identity(int rows, int cols, double v = 1.0);
