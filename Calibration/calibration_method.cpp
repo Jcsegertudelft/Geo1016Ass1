@@ -26,6 +26,7 @@
 #include "matrix_algo.h"
 
 
+
 using namespace easy3d;
 
 
@@ -70,6 +71,8 @@ bool Calibration::calibration(
     // length. With 'std::vector', you can append/delete/insert elements, and much more. The 'std::vector' can store
     // not only 'double', but also any other types of objects. In case you may want to learn more about 'std::vector'
     // check here: https://en.cppreference.com/w/cpp/container/vector
+
+    /*
     std::vector<double> array = {1, 3, 3, 4, 7, 6, 2, 8, 2, 8, 3, 2, 4, 9, 1, 7, 3, 23, 2, 3, 5, 2, 1, 5, 8, 9, 22};
     array.push_back(5); // append 5 to the array (so the size will increase by 1).
     array.insert(array.end(), 10, 3);  // append ten 3 (so the size will grow by 10).
@@ -181,6 +184,7 @@ bool Calibration::calibration(
     // Let's check if the inverse is correct
     std::cout << "T * invT: \n" << T * invT << std::endl;
 
+    */
     // TODO: the above code just demonstrates some useful data structures and APIs. Please remove all above code in your
     //       final submission.
 
@@ -247,15 +251,179 @@ bool Calibration::calibration(
     //   Optional: you can check if your M is correct by applying M on the 3D points. If correct, the projected point
     //             should be very close to your input images points.
 
+    //solving for M where M = K * [ R, t] using SVD decomposition
+
+    // From the obtained P matrix, Pm=0.
+
+    // m -> Rows
+    // n -> Columns
+
+    int m_rows = 2 * n_points_3d;
+    int n_cols = 12;
+
+
+    // Compute the SVD decomposition of A
+    Matrix U(m_rows, m_rows, 0.0);   // initialized with 0s
+    Matrix S(m_rows, n_cols, 0.0);   // initialized with 0s
+    Matrix V(n_cols, n_cols, 0.0);   // initialized with 0s
+
+    svd_decompose(P, U, S, V);
+
+    // Check 1: U is orthogonal, so U * U^T must be identity
+    std::cout << "U*U^T: \n" << U * transpose(U) << std::endl;
+
+    // Check 2: V is orthogonal, so V * V^T must be identity
+    std::cout << "V*V^T: \n" << V * transpose(V) << std::endl;
+
+    // Check 3: S must be a diagonal matrix
+    std::cout << "S: \n" << S << std::endl;
+
+    // Check 4: according to the definition, A = U * S * V^T
+    std::cout << "M - U * S * V^T: \n" << P - U * S * transpose(V) << std::endl;
+
+
+    std:: cout<< " V Matrix \n " << V << std::endl;
+
+   // std :: cout << V(11,11);
+
+    // Forming the m  matrix by taking the last column of V matrix
+
+    int count = 0;
+    Matrix34 m;
+    for (int i = 0;i<3;i++) {
+        for (int j = 0;j<4;j++) {
+            m[i][j] = V(count,11);
+            count++;
+        }
+        if (count > 11)
+            break;
+
+    }
+
+    std::cout << m << std::endl;
+    /*
+    std::cout << " Cross Checking m Matrix by reprojecting \n";
+
+    std::cout << " Points 3 D " << points_3d[0];
+
+    Matrix test(4, 1, 0.0);
+    test.set_column(0,{2,4,0,1});
+
+    Matrix k = m *test;
+    std::cout<<std::endl<< k << std::endl;
+
+    // Divide by perspective
+    float pers=k[2][0];
+
+    std::cout<<pers<<std::endl;
+    for (int i = 0;i<3;i++) {
+        k[i][0]=k[i][0]/pers;
+    }
+    std::cout<< k << std::endl;
+
+    */
+
+
     // TODO: extract intrinsic parameters from M.
 
+    // Denoting the  M matrix into [ A b ] format i.e A = 3 x 3, B = 3 x 1 Matrices
+
+    Matrix A(3,3,0.0);
+    Matrix B(3,1,0.0);
+
+    for (int i = 0;i<3;i++) {
+        for (int j = 0;j<3;j++) {
+            A(i,j) = m[i][j];
+        }
+    }
+
+    for (int i=0;i<3;i++) {
+        B(i,0) = m[i][3];
+    }
+
+    std::cout<< "Matrix A " << A<< std::endl;
+    std::cout<< "Matrix B " << B;
+
+    Vector3D a_1(A[0][0], A[0][1], A[0][2]);
+    Vector3D a_2(A[1][0], A[1][1], A[1][2]);
+    Vector3D a_3(A[2][0], A[2][1], A[2][2]);
+
+    Vector3D b_vector(B[0][0], B[1][0], A[2][0]);
+
+    /*
+     *
+    * /// the length of a vector
+    double len = p.length();
+    /// the squared length of a vector
+    double sqr_len = p.length2();
+
+    /// the dot product of two vectors
+    double dot_prod = dot(p, q);
+
+    /// the cross product of two vectors
+    Vector cross_prod = cross(c, q);
+
+    /// normalize this vector
+    cross_prod.normalize();
+     */
+
+
+     double rho = 1 / (a_3.length());
+     cx=rho*rho * (dot(a_1,a_3));
+     cy=rho*rho * (dot(a_2,a_3));
+
+    std::cout << "Rho : " <<rho <<std::endl << "Cx" << cx << std::endl << "Cy" << cy << std::endl;
+
+    double numerator = -1 * dot((cross(a_1,a_3)),(cross(a_2,a_3)));
+    double denominator =  length(cross(a_1,a_3))*length(cross(a_2,a_3));
+
+    std::cout << numerator << std::endl << denominator << std::endl;
+
+    double theta = acos(numerator/denominator);
+    std::cout << numerator << std::endl << denominator << std::endl << "Theta value : "<<theta << std::endl;
+
+
+    double alpha = rho * rho * length(cross(a_1,a_3)) * sin(theta);
+    double beta = rho * rho * length(cross(a_2,a_3)) * sin(theta);
+
+    std::cout << "Alpha : " << alpha << std::endl << "Beta : "<< beta << std::endl;
+
+    // Making the intrinsic matrix
+    Matrix33 K;
+
+    K.set_row(0,{alpha,-1*alpha * (1/tan(theta)), cx});
+    K.set_row(1,{0,beta/sin(theta),cy});
+    K.set_row(2,{0,0,1});
+
+    std::cout << "\n \n Matrix K : "<< K;
+
     // TODO: extract extrinsic parameters from M.
+
+    Vector3D r_1 = (cross(a_2,a_3))/length((cross(a_2,a_3)));
+    Vector3D r_3 = rho * a_3;
+    Vector3D r_2 = cross(r_3,r_1);
+
+    R.set_row(0,r_1);
+    R.set_row(1,r_2);
+    R.set_row(2,r_3);
+
+     Matrix h = rho *  inverse(K) * B;
+     Vector3D temp(h[0][0], h[1][0], h[2][0]);
+     t = temp;
+
+     std::cout<<"R : " << R << std::endl;
+
+     std::cout << "t : " << t << std::endl;
+
+     fx = alpha;
+     fy = beta/sin(theta);
+     s = -1 * alpha * (1/tan(theta));
 
     // TODO: make sure the recovered parameters are passed to the corresponding variables (fx, fy, cx, cy, s, R, and t)
 
     std::cout << "\n\tTODO: After you implement this function, please return 'true' - this will trigger the viewer to\n"
                  "\t\tupdate the rendering using your recovered camera parameters. This can help you to visually check\n"
                  "\t\tif your calibration is successful or not.\n\n" << std::flush;
-    return false;
+    return true;
 }
 
