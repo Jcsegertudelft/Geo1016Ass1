@@ -279,12 +279,9 @@ bool Calibration::calibration(
     std::cout << "S: \n" << S << std::endl;
 
     // Check 4: according to the definition, A = U * S * V^T
-    std::cout << "M - U * S * V^T: \n" << P - U * S * transpose(V) << std::endl;
-
+    std::cout << "P - U * S * V^T: \n" << P - U * S * transpose(V) << std::endl;
 
     std:: cout<< " V Matrix \n " << V << std::endl;
-
-   // std :: cout << V(11,11);
 
     // Forming the m  matrix by taking the last column of V matrix
 
@@ -368,20 +365,19 @@ bool Calibration::calibration(
      */
 
 
-     double rho = 1 / (a_3.length());
-     cx=rho*rho * (dot(a_1,a_3));
-     cy=rho*rho * (dot(a_2,a_3));
+    double rho = 1 / (a_3.length());
+    cx=rho*rho * (dot(a_1,a_3));
+    cy=rho*rho * (dot(a_2,a_3));
 
-    std::cout << "Rho : " <<rho <<std::endl << "Cx" << cx << std::endl << "Cy" << cy << std::endl;
+    std::cout << "Rho : " <<rho <<std::endl << "Cx :" << cx << std::endl << "Cy :" << cy << std::endl;
 
     double numerator = -1 * dot((cross(a_1,a_3)),(cross(a_2,a_3)));
     double denominator =  length(cross(a_1,a_3))*length(cross(a_2,a_3));
-
-    std::cout << numerator << std::endl << denominator << std::endl;
-
     double theta = acos(numerator/denominator);
-    std::cout << numerator << std::endl << denominator << std::endl << "Theta value : "<<theta << std::endl;
+    double theta_deg = theta * 180 / M_PI;
 
+    std::cout << "Theta value : "<<theta << " Rad" <<  std::endl;
+    std::cout << "Theta in degrees : "<< theta_deg << std::endl;
 
     double alpha = rho * rho * length(cross(a_1,a_3)) * sin(theta);
     double beta = rho * rho * length(cross(a_2,a_3)) * sin(theta);
