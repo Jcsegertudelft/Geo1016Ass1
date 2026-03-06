@@ -193,7 +193,7 @@ bool Calibration::calibration(
     cx=rho*rho * (dot(a_1,a_3));
     cy=rho*rho * (dot(a_2,a_3));
 
-    std::cout << "Rho : " <<rho <<std::endl << "Cx :" << cx << std::endl << "Cy :" << cy << std::endl;
+    std::cout << "Cx :" << cx << std::endl << "Cy :" << cy << std::endl;
 
     double numerator = -1 * dot((cross(a_1,a_3)),(cross(a_2,a_3)));
     double denominator =  length(cross(a_1,a_3))*length(cross(a_2,a_3));
@@ -229,7 +229,20 @@ bool Calibration::calibration(
 
      Matrix h = rho *  inverse(K) * B;
      Vector3D temp(h[0][0], h[1][0], h[2][0]);
+
+    //Checking for sign of rho through Z-value of translation
+    if (temp.z() < 0)
+    {
+        rho = -rho;
+        temp = -temp;
+        r_3 = -r_3;
+        r_2 = -r_2;
+        R.set_row(2,r_3);
+        R.set_row(1,r_2);
+    }
      t = temp;
+
+    std::cout << "rho : " << rho << std::endl;
 
      std::cout<<"\n Matrix R : " << R << std::endl;
 
