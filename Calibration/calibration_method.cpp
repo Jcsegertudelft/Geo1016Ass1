@@ -168,7 +168,7 @@ bool Calibration::calibration(
     Vector3D a_2(A[1][0], A[1][1], A[1][2]);
     Vector3D a_3(A[2][0], A[2][1], A[2][2]);
 
-    Vector3D b_vector(B[0][0], B[1][0], A[2][0]);
+    Vector3D b_vector(B[0][0], B[1][0], B[2][0]);
 
     /*
      *
@@ -197,7 +197,9 @@ bool Calibration::calibration(
 
     double numerator = -1 * dot((cross(a_1,a_3)),(cross(a_2,a_3)));
     double denominator =  length(cross(a_1,a_3))*length(cross(a_2,a_3));
-    double theta = acos(numerator/denominator);
+    double c = numerator/denominator;
+    c = std::max(-1.0, std::min(1.0, c));
+    double theta = acos(c);    
     double theta_deg = theta * 180 / M_PI;
 
     std::cout << "Theta value : "<<theta << " Rad" <<  std::endl;
