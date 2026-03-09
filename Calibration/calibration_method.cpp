@@ -168,26 +168,7 @@ bool Calibration::calibration(
     Vector3D a_2(A[1][0], A[1][1], A[1][2]);
     Vector3D a_3(A[2][0], A[2][1], A[2][2]);
 
-    Vector3D b_vector(B[0][0], B[1][0], B[2][0]);
-
-    /*
-     *
-    * /// the length of a vector
-    double len = p.length();
-    /// the squared length of a vector
-    double sqr_len = p.length2();
-
-    /// the dot product of two vectors
-    double dot_prod = dot(p, q);
-
-    /// the cross product of two vectors
-    Vector cross_prod = cross(c, q);
-
-    /// normalize this vector
-    cross_prod.normalize();
-     */
-
-    //Calculate the intrinsic parameters from A and b
+    Vector3D b_vector(B[0][0], B[1][0], A[2][0]);
 
     double rho = 1 / (a_3.length());
     cx=rho*rho * (dot(a_1,a_3));
@@ -197,9 +178,7 @@ bool Calibration::calibration(
 
     double numerator = -1 * dot((cross(a_1,a_3)),(cross(a_2,a_3)));
     double denominator =  length(cross(a_1,a_3))*length(cross(a_2,a_3));
-    double c = numerator/denominator;
-    c = std::max(-1.0, std::min(1.0, c));
-    double theta = acos(c);    
+    double theta = acos(numerator/denominator);
     double theta_deg = theta * 180 / M_PI;
 
     std::cout << "Theta value : "<<theta << " Rad" <<  std::endl;
@@ -256,7 +235,6 @@ bool Calibration::calibration(
 
     std::cout << "fx : " << fx << std::endl << "fy : " << fy << std::endl << "s : " << s << std::endl;
 
-    //Return true to indicate successful calibration
     return true;
 }
 
