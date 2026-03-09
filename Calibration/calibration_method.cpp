@@ -116,6 +116,7 @@ bool Calibration::calibration(
     std::cout << std::endl << " Cross Checking m Matrix by reprojecting the points and calculating error: \n";
     std::cout <<"Point\t"<<"U(Ori.)\t"<<" V(Ori.)\t"<<" u(Repr.)\t"<<" v(Repr. )\t"<<"Error"<<std::endl;
     double total_error = 0.0;
+    double total_error_squared = 0.0;
     for (unsigned int i = 0; i < n_points_3d; i++)
     {
         // 3D point in homogeneous coordinates
@@ -140,11 +141,14 @@ bool Calibration::calibration(
         // Reprojection error
         double err = sqrt((u - u_original)*(u - u_original) + (v - v_original)*(v - v_original));
         total_error = err + total_error;
+        total_error_squared = pow(err,2) + total_error_squared;
         std::cout<<"\t"<<i<<"\t\t"<<u_original<<"\t\t"<<v_original<<"\t\t"<<u<<"\t\t"<<v<<"\t\t"<<err<<std::endl;
     }
     double mean_error = total_error / n_points_3d;
+    double RMSE = sqrt(total_error_squared / n_points_3d);
 
     std::cout <<"\n Mean Reprojection Error: " << mean_error << std::endl;
+    std::cout <<"\n RMSE : " << RMSE << std::endl
 
 
     // Denoting the  M matrix into [ A b ] format i.e A = 3 x 3, B = 3 x 1 Matrices
