@@ -84,7 +84,6 @@ bool Calibration::calibration(
     //solving for M where M = K * [ R, t] using SVD decomposition
 
     // From the obtained P matrix, Pm=0.
-
     // m -> Rows
     // n -> Columns
 
@@ -92,27 +91,12 @@ bool Calibration::calibration(
     int n_cols = 12;
 
 
-    // Compute the SVD decomposition of A
+    // Computing the the SVD decomposition of Matrix P
     Matrix U(m_rows, m_rows, 0.0);   // initialized with 0s
     Matrix S(m_rows, n_cols, 0.0);   // initialized with 0s
     Matrix V(n_cols, n_cols, 0.0);   // initialized with 0s
 
     svd_decompose(P, U, S, V);
-
-    // Checks to see if SVD went correctly
-    // Check 1: U is orthogonal, so U * U^T must be identity
-    std::cout << "U*U^T: \n" << U * transpose(U) << std::endl;
-
-    // Check 2: V is orthogonal, so V * V^T must be identity
-    std::cout << "V*V^T: \n" << V * transpose(V) << std::endl;
-
-    // Check 3: S must be a diagonal matrix
-    std::cout << "S: \n" << S << std::endl;
-
-    // Check 4: according to the definition, A = U * S * V^T
-    std::cout << "P - U * S * V^T: \n" << P - U * S * transpose(V) << std::endl;
-
-    // Forming the m  matrix by taking the last column of V matrix
 
     int count = 0;
     Matrix34 m;
@@ -126,27 +110,42 @@ bool Calibration::calibration(
 
     }
 
-    /*
-    std::cout << " Cross Checking m Matrix by reprojecting \n";
+    std::cout<<std::endl << "m Matrix : "<< m << std::endl;
 
-    std::cout << " Points 3 D " << points_3d[0];
+    // Evaluation of the Calibration
+    std::cout << std::endl << " Cross Checking m Matrix by reprojecting the points and calculating error: \n";
+    std::cout <<"Point\t"<<"U(Ori.)\t"<<" V(Ori.)\t"<<" u(Repr.)\t"<<" v(Repr. )\t"<<"Error"<<std::endl;
+    double total_error = 0.0;
+    for (unsigned int i = 0; i < n_points_3d; i++)
+    {
+        // 3D point in homogeneous coordinates
+        Matrix X(4,1,0.0);
+        X.set_column(0,{
+            points_3d[i][0],
+            points_3d[i][1],
+            points_3d[i][2],
+            1
+        });
+        // Projection using Matrix m
+        Matrix proj = m * X;
 
-    Matrix test(4, 1, 0.0);
-    test.set_column(0,{2,4,0,1});
+        // Perspective division
+        double u = proj[0][0] / proj[2][0];
+        double v = proj[1][0] / proj[2][0];
 
-    Matrix k = m *test;
-    std::cout<<std::endl<< k << std::endl;
+        // Original image point
+        double u_original = points_2d[i][0];
+        double v_original = points_2d[i][1];
 
-    // Divide by perspective
-    float pers=k[2][0];
-
-    std::cout<<pers<<std::endl;
-    for (int i = 0;i<3;i++) {
-        k[i][0]=k[i][0]/pers;
+        // Reprojection error
+        double err = sqrt((u - u_original)*(u - u_original) + (v - v_original)*(v - v_original));
+        total_error = err + total_error;
+        std::cout<<"\t"<<i<<"\t\t"<<u_original<<"\t\t"<<v_original<<"\t\t"<<u<<"\t\t"<<v<<"\t\t"<<err<<std::endl;
     }
-    std::cout<< k << std::endl;
+    double mean_error = total_error / n_points_3d;
 
-    */
+    std::cout <<"\n Mean Reprojection Error: " << mean_error << std::endl;
+
 
     // Denoting the  M matrix into [ A b ] format i.e A = 3 x 3, B = 3 x 1 Matrices
 
@@ -168,7 +167,7 @@ bool Calibration::calibration(
     Vector3D a_2(A[1][0], A[1][1], A[1][2]);
     Vector3D a_3(A[2][0], A[2][1], A[2][2]);
 
-    Vector3D b_vector(B[0][0], B[1][0], A[2][0]);
+    Vector3D b_vector(B[0][0], B[1][0], B[2][0]);
 
     double rho = 1 / (a_3.length());
     cx=rho*rho * (dot(a_1,a_3));
@@ -178,10 +177,12 @@ bool Calibration::calibration(
 
     double numerator = -1 * dot((cross(a_1,a_3)),(cross(a_2,a_3)));
     double denominator =  length(cross(a_1,a_3))*length(cross(a_2,a_3));
-    double theta = acos(numerator/denominator);
+    double c = numerator/denominator;
+    c = std::max(-1.0, std::min(1.0, c));
+    double theta = acos(c);    
     double theta_deg = theta * 180 / M_PI;
 
-    std::cout << "Theta value : "<<theta << " Rad" <<  std::endl;
+    std::cout << "Theta value : "<< theta << " Rad" <<  std::endl;
     std::cout << "Theta in degrees : "<< theta_deg << std::endl;
 
     double alpha = rho * rho * length(cross(a_1,a_3)) * sin(theta);
@@ -234,6 +235,9 @@ bool Calibration::calibration(
      s = -1 * alpha * (1/tan(theta));
 
     std::cout << "fx : " << fx << std::endl << "fy : " << fy << std::endl << "s : " << s << std::endl;
+
+
+
 
     return true;
 }
